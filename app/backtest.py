@@ -68,7 +68,7 @@ def _order(code, amount):
         print('no trading today')
         return
 
-    price = today_data['close'].values[0]
+    price = today_data['open'].values[0]
     if context.cash - amount * price < 0:
         amount = int(context.cash / price)
         print('not enough cash, adjusted to %d' %(amount))
@@ -89,5 +89,43 @@ def _order(code, amount):
         del context.positions[code]
 
     context.cash -= amount * price
+
+def order(code, amount):
+    _order(code, amount)
+
+# buy stock to target amount
+def order_target_amount(code, target):
+    if target < 0:
+        print("target should not be less than 0")
+        target = 0
+
+    #TODO: considering T+1 trade: closable amount & total amount
+    hold_amount = context.positions.get(code, 0)
+    delta_amount = target - hold_amount
+    _order(code, delta_amount)
+
+# buy stock of specific value
+def order_value(code, value):
+    today_data = get_today_data(code)
+    amount = int(value / today_data['open'])
+    _order(code, amount)
+
+# buy stock to target value
+def order_target_value(code, target):
+    if target < 0:
+        print("target should not be less than 0")
+        target = 0
+
+    today_data = get_today_data(code)
+    price = today_data['open']
+    hold_value = context.positions.get(code, 0) * price
+
+    delta_value = target - hold_value
+    order_value(code, delta_value)
+
+
+
+
+
 
 
