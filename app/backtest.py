@@ -22,27 +22,28 @@ class G:
 def set_benchmark(code):
     context.benchmark = code
 
-def get_hist_data_by_count(code, count, fields=['open', 'close', 'high', 'low', 'volume', 'preClose']):
+def get_hist_data_by_count(context, code, count, dividend_type='none', period='1d', fields=['open', 'close', 'high', 'low', 'volume', 'amount', 'preClose']):
     hist_end_date = (dateutil.parser.parse(context.bkt_dt) - datetime.timedelta(days=1)).strftime("%Y%m%d")
 
     trd_calendar = xtdata.get_trading_calendar(context.market)
     hist_start_date = [dt for dt in trd_calendar if dt <= hist_end_date][-count:][0]
 
-    _period = '1d'
+    
     code = code+"."+context.market
-    xtdata.download_history_data(code, _period, hist_start_date, hist_end_date)
+    xtdata.download_history_data(code, period, hist_start_date, hist_end_date)
 
     ret = xtdata.get_market_data_ex(field_list=fields,
                                     stock_list=[code],
-                                    period=_period,
+                                    period=period,
                                     start_time='',
                                     end_time=hist_end_date,
-                                    count=count
+                                    count=count,
+                                    dividend_type=dividend_type
             )[code]
 
     return ret
 
-def get_hist_data_by_daterange(code, hist_start_date, hist_end_date, fields=['open', 'close', 'high', 'low', 'volume', 'preClose']):
+def get_hist_data_by_daterange(code, hist_start_date, hist_end_date, fields=['open', 'close', 'high', 'low', 'volume', 'amount', 'preClose']):
     _period = '1d'
     code = code+"."+context.market
     xtdata.download_history_data(code, _period, hist_start_date, hist_end_date)
@@ -57,7 +58,7 @@ def get_hist_data_by_daterange(code, hist_start_date, hist_end_date, fields=['op
 
     return ret
 
-def get_today_data(code, fields=['open', 'close', 'high', 'low', 'volume', 'preClose']):
+def get_today_data(code, fields=['open', 'close', 'high', 'low', 'volume', 'amount', 'preClose']):
     _period = '1d'
     _count = 1
     code = code+"."+context.market
@@ -179,7 +180,7 @@ def initialize(context):
     g.code = '601318'
 
 def handle_data(context):
-    hist_data = get_hist_data_by_count(g.code, g.p2)
+    hist_data = get_hist_data_by_count(context, g.code, g.p2)
     ma5 = hist_data['open'][-5:].mean()
     ma60 = hist_data['open'].mean()
 
