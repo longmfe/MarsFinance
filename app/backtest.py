@@ -431,11 +431,22 @@ def generate_hs300_sample_data(stock_codes, start_date='2020-01-01', end_date='2
     
     return stock_data_dict
 
-# 获取沪深300股票列表（示例）
 def get_hs300_stock_list():
-    """获取沪深300股票列表（示例）"""
-    # 这里返回示例股票代码，实际使用时可以从文件或API获取
-    return [f"000{i:03d}.SZ" for i in range(1, 51)] + [f"600{i:03d}.SH" for i in range(1, 51)]
+    """
+    获取沪深300成分股列表
+
+    Returns:
+        list: 包含沪深300成分股代码的列表，如果获取失败则返回空列表
+    """
+    try:
+        # 获取沪深300成分股列表
+        hs300_constituents = xtdata.get_stock_list_in_sector('沪深300')
+        print(f"成功获取 {len(hs300_constituents)} 只沪深300成分股")
+        print("前5只成分股示例:", hs300_constituents[:5])
+        return hs300_constituents
+    except Exception as e:
+        print(f"获取沪深300成分股列表出错: {e}")
+        return []  # 返回空列表而不是None，避免后续处理出错
 
 # 主函数
 def main():
