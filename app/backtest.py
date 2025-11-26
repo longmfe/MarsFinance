@@ -398,36 +398,25 @@ def enhanced_ma_strategy(data, short_window=10, long_window=30):
         return 0
 
 # 数据生成函数（模拟沪深300股票数据）
-def generate_hs300_sample_data(stock_codes, start_date='2020-01-01', end_date='2023-12-31'):
+def generate_hs300_sample_data(stock_codes, start_date='20200101', end_date='20231231'):
     """生成沪深300股票的模拟数据"""
     date_range = pd.date_range(start=start_date, end=end_date, freq='D')
     stock_data_dict = {}
-    
-    base_volatility = 0.02  # 基础波动率
-    market_trend = np.linspace(0, 0.3, len(date_range))  # 市场整体趋势
-    
+    fields=['open', 'close', 'high', 'low', 'volume', 'amount', 'preClose']
+       
     for i, code in enumerate(stock_codes):
-        # 为每只股票生成不同的特征
-        stock_volatility = base_volatility * (0.8 + 0.4 * np.random.random())
-        stock_trend_strength = 0.5 + 0.5 * np.random.random()
-        start_price = 10 + 90 * np.random.random()  # 起始价格在10-100之间
-        
-        # 生成收益序列
-        returns = np.random.normal(0.0003 * stock_trend_strength, stock_volatility, len(date_range))
-        
-        # 创建价格序列，加入市场趋势和个股特性
-        prices = start_price * (1 + returns).cumprod() * (1 + market_trend * stock_trend_strength)
-        
-        data = pd.DataFrame({
-            'date': date_range,
-            'open': prices * (1 + np.random.normal(0, 0.005, len(date_range))),
-            'high': prices * (1 + np.abs(np.random.normal(0, 0.01, len(date_range)))),
-            'low': prices * (1 - np.abs(np.random.normal(0, 0.01, len(date_range)))),
-            'close': prices,
-            'volume': np.random.randint(1000000, 10000000, len(date_range))
-        })
-        
-        stock_data_dict[code] = data
+        print(f"\n正在测试第 {i+1} 只股票: {code}")
+        data = xtdata.get_market_data_ex(field_list=fields, stock_list=[code], 
+                                         start_time=start_date, end_time=end_date, period='1d', 
+                                         count=1000)
+    
+        if data and code in data:
+            df = data[code]
+            stock_data_dict[code] = df
+            print(f"成功! 数据形状: {df.shape}, 列名: {df.columns.tolist()}")
+        else:
+            print("获取失败或数据格式异常") 
+       
     
     return stock_data_dict
 
@@ -458,8 +447,8 @@ def main():
     print("生成股票数据...")
     stock_data_dict = generate_hs300_sample_data(
         stock_codes, 
-        start_date='2020-01-01', 
-        end_date='2023-12-31'
+        start_date='20240101', 
+        end_date='20241231'
     )
     
     # 创建组合回测实例
@@ -470,8 +459,8 @@ def main():
     portfolio_backtest.run_stock_universe_backtest(
         stock_data_dict=stock_data_dict,
         strategy_function=lambda x: enhanced_ma_strategy(x, 15, 50),
-        start_date='2021-01-01',
-        end_date='2023-12-31',
+        start_date='20240101',
+        end_date='20241231',
         capital_per_stock=20000  # 每只股票分配2万元
     )
     
