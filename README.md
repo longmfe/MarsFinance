@@ -28,15 +28,30 @@ NumPy >= 1.21.0
 Scikit-learn >= 1.2.0
 Matplotlib >= 3.5.0
 Optuna >= 3.0.0
+```
 
 ### 系统目录结构
+```
 MarsFinance/
-├── data_loader/          # 数据获取与处理模块
-├── strategies/           # 策略库
-├── backtest/             # 回测引擎
-├── optimization/         # 参数优化
-├── visualization/        # 可视化分析
-└── examples/            # 使用示例
+├── 📊 data_loader/          # 数据获取与处理模块
+│   ├── __init__.py
+│   └── data_loader.py
+├── 🤖 strategies/           # 策略库
+│   ├── __init__.py
+│   └── volume_price_strategy.py
+├── 🔄 backtest/             # 回测引擎
+│   ├── __init__.py
+│   ├── stock_backtest.py
+│   └── portfolio_backtest.py
+├── ⚙️ optimization/         # 参数优化
+│   ├── __init__.py
+│   └── parameter_optimizer.py
+├── 📈 visualization/        # 可视化分析
+│   ├── __init__.py
+│   └── performance_plotter.py
+└── 📚 examples/            # 使用示例
+    └── basic_usage.py
+```
 
 ### 🚀 快速开始
 # 安装依赖
@@ -44,6 +59,7 @@ bash
 pip install -r requirements.txt
 
 # 基本使用
+python
 from marsfinance import DataLoader, PortfolioBacktest
 from marsfinance.strategies import EnhancedVolumePriceStrategy
 
