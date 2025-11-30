@@ -54,36 +54,28 @@ MarsFinance/
 ```
 
 ### 🚀 快速开始
-# 安装依赖
-```
-bash
+#### 安装依赖
+```bash
 pip install -r requirements.txt
 ```
 
-# 基本使用
-```
-python
+#### 基本使用
+```python
 from marsfinance import DataLoader, PortfolioBacktest
 from marsfinance.strategies import EnhancedVolumePriceStrategy
-```
 
 # 加载数据
-```
 loader = DataLoader()
 stock_data = loader.load_hs300_data('20230101', '20231231')
-```
 
 # 运行回测
-```
 backtest = PortfolioBacktest(initial_capital=1000000)
 backtest.run_stock_universe_backtest(
     stock_data_dict=stock_data,
     strategy_function=EnhancedVolumePriceStrategy,
     capital_per_stock=20000
 )
-```
 
 # 查看结果
-```
 backtest.print_detailed_report()
 ```
