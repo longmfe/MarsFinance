@@ -53,13 +53,13 @@ MarsFinance/
     └── basic_usage.py
 ```
 
-### 🚀 快速开始
-#### 安装依赖
+## 🚀 快速开始
+### 安装依赖
 ```bash
 pip install -r requirements.txt
 ```
 
-#### 基本使用
+### 基本使用
 ```python
 from marsfinance import DataLoader, PortfolioBacktest
 from marsfinance.strategies import EnhancedVolumePriceStrategy
