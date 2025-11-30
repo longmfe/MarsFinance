@@ -28,3 +28,36 @@ NumPy >= 1.21.0
 Scikit-learn >= 1.2.0
 Matplotlib >= 3.5.0
 Optuna >= 3.0.0
+
+### 系统目录结构
+MarsFinance/
+├── data_loader/          # 数据获取与处理模块
+├── strategies/           # 策略库
+├── backtest/             # 回测引擎
+├── optimization/         # 参数优化
+├── visualization/        # 可视化分析
+└── examples/            # 使用示例
+
+### 🚀 快速开始
+# 安装依赖
+bash
+pip install -r requirements.txt
+
+# 基本使用
+from marsfinance import DataLoader, PortfolioBacktest
+from marsfinance.strategies import EnhancedVolumePriceStrategy
+
+# 加载数据
+loader = DataLoader()
+stock_data = loader.load_hs300_data('20230101', '20231231')
+
+# 运行回测
+backtest = PortfolioBacktest(initial_capital=1000000)
+backtest.run_stock_universe_backtest(
+    stock_data_dict=stock_data,
+    strategy_function=EnhancedVolumePriceStrategy,
+    capital_per_stock=20000
+)
+
+# 查看结果
+backtest.print_detailed_report()
