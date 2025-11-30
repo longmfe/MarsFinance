@@ -1,0 +1,35 @@
+# 核心数据处理
+pandas>=1.5.0
+numpy>=1.21.0
+
+# 机器学习
+scikit-learn>=1.2.0
+
+# 数据可视化
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# 参数优化
+optuna>=3.0.0
+
+# 科学计算
+scipy>=1.7.0
+
+# 日期时间处理
+python-dateutil>=2.8.2
+
+# 进度显示（可选，但推荐）
+tqdm>=4.60.0
+
+# 数据分析扩展
+statsmodels>=0.13.0
+
+# 网络请求（用于数据获取）
+requests>=2.25.1
+
+# 配置文件处理
+pyyaml>=5.4.1
+
+# 开发工具（可选）
+jupyter>=1.0.0
+ipython>=7.22.0
