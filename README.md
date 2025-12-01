@@ -33,6 +33,26 @@ Optuna >= 3.0.0
 ### 系统目录结构
 ```
 MarsFinance/
+├── 📊 app/                      # 策略开发应用目录
+│   ├── __init__.py
+│   ├── config/                  # 策略配置文件
+│   │   ├── __init__.py
+│   │   ├── strategy_config.yaml
+│   │   └── market_config.py
+│   ├── core/                    # 策略核心组件
+│   │   ├── __init__.py
+│   │   ├── signal_generator.py
+│   │   ├── risk_manager.py
+│   │   └── position_sizer.py
+│   ├── utils/                   # 策略开发工具
+│   │   ├── __init__.py
+│   │   ├── data_processor.py
+│   │   ├── performance_analyzer.py
+│   │   └── report_generator.py
+│   └── pipelines/               # 策略流水线
+│       ├── __init__.py
+│       ├── strategy_pipeline.py
+│       └── backtest_pipeline.py
 ├── 📊 data_loader/          # 数据获取与处理模块
 │   ├── __init__.py
 │   └── data_loader.py
