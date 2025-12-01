@@ -1,0 +1,21 @@
+# 量价策略配置
+volume_price_strategy:
+  base_buy_threshold: 1.2
+  base_sell_threshold: 0.8
+  volume_period: 20
+  stop_loss_pct: 0.05
+  take_profit_pct: 0.10
+  max_position_size: 0.3
+
+# 市场状态配置
+market_regimes:
+  high_volatility_threshold: 2.0
+  low_volatility_threshold: 0.5
+  bull_market_threshold: 1.02
+  bear_market_threshold: 0.98
+
+# 风险管理配置
+risk_management:
+  max_drawdown_limit: 0.15
+  sharpe_ratio_target: 1.5
+  max_consecutive_losses: 5
