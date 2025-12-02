@@ -26,7 +26,7 @@ class StockBacktest:
         self.position_price = 0
         self.current_stock = None
         
-    def run_backtest(self, data, strategy_function, stock_code=None):
+    def run_backtest(self, data, strategy_function, stock_code=None, enable_stop=True)):
         """
         运行单只股票的回测
         data: 包含价格数据的DataFrame，必须有'close'列
@@ -55,6 +55,11 @@ class StockBacktest:
                 
             # 获取交易信号
             signal = strategy_function(current_data)
+
+            # 判断止损信号
+            stop_loss = current_price < self.position_price * 0.95
+            if stop_loss & enable_stop:
+                signal = -1
             
             # 执行交易逻辑
             self.execute_trade(signal, current_price, current_date)
