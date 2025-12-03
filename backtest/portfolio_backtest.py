@@ -91,7 +91,7 @@ class PortfolioBacktest:
         total_final_value = sum(result['final_value'] for result in self.stock_results.values())
         total_initial_value = sum(result['initial_capital'] for result in self.stock_results.values())
         portfolio_return = (total_final_value - total_initial_value) / total_initial_value
-        
+
         # 平均指标
         avg_annual_return = np.mean([r['annual_return'] for r in self.stock_results.values()])
         avg_sharpe = np.mean([r['sharpe_ratio'] for r in self.stock_results.values()])
@@ -101,7 +101,7 @@ class PortfolioBacktest:
         # 正收益股票比例
         positive_returns = len([r for r in self.stock_results.values() if r['total_return'] > 0])
         positive_ratio = positive_returns / len(self.stock_results)
-        
+
         return {
             'portfolio_total_return': portfolio_return,
             'avg_annual_return': avg_annual_return,
@@ -146,7 +146,7 @@ class PortfolioBacktest:
             for stock, metrics in sorted_stocks[-5:]:
                 print(f"  {stock}: {metrics['total_return']:.2%} (交易次数: {metrics['total_trades']})")
     
-    def plot_portfolio_performance(self):
+    def plot_portfolio_performance(self, benchmark_data_dict):
         """绘制组合表现"""
         if not self.portfolio_values:
             print("没有足够的数据进行绘图")
@@ -179,7 +179,13 @@ class PortfolioBacktest:
             
             if len(avg_values) == len(sorted_dates):
                 plt.plot(sorted_dates, avg_values, 'b-', linewidth=3, label='AvgReturn')
-        
+
+        if benchmark_data_dict:
+            for benchmark_code, data in benchmark_data_dict.items():
+                data['norm_value'] = data['close'] / data['close'][0]
+                plt.plot(data['norm_value'], 'r--', linewidth=2, label='Benchmark')
+                plt.xticks(range(1, len(data.index), 5), rotation=75)
+              
         plt.title('Norm Curve')
         plt.ylabel('Norm')
         plt.legend()
@@ -220,5 +226,4 @@ class PortfolioBacktest:
         
         plt.tight_layout()
         plt.show()
-
 
