@@ -36,13 +36,13 @@ def run_advanced_strategy_test():
     portfolio_backtest.print_detailed_report()
     
     # 绘制结果
-    portfolio_backtest.plot_portfolio_performance()
-
-    # 与benchmark对比
-    portfolio_backtest.plot_portfolio_benchmark()
-
-
-    return
+    benchmark_codes = ['000300.SH']
+    benchmark_data_dict = generate_hs300_sample_data(
+        benchmark_codes, 
+        start_date='20250101', 
+        end_date='20251231'
+    )
+    portfolio_backtest.plot_portfolio_performance(benchmark_data_dict)
 
     # 定义策略集合
     strategies = {
@@ -87,3 +87,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
