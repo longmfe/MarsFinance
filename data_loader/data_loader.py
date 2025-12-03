@@ -38,6 +38,7 @@ class DataLoader:
         date_range = pd.date_range(start=start_date, end=end_date, freq='D')
         stock_data_dict = {}
         fields=['open', 'close', 'high', 'low', 'volume', 'amount', 'preClose']
+        xtdata.download_history_data2(stock_codes, '1d', start_date, end_date)
 
         for i, code in enumerate(stock_codes):
             print(f"\n正在测试第 {i+1} 只股票: {code}")
@@ -79,3 +80,4 @@ class DataLoader:
     def list_available_data(self) -> list:
         """列出可用数据"""
         return list(self.data_sources.keys())
+
