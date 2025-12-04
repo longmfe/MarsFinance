@@ -56,13 +56,16 @@ class StockBacktest:
             # 获取交易信号
             signal = strategy_function(current_data)
 
+            trade_subtype = None
+
             # 判断止损信号
             stop_loss = current_price < self.position_price * 0.95
             if stop_loss & enable_stop:
                 signal = -1
+                trade_subtype = 'STOP_LOSS'
             
             # 执行交易逻辑
-            self.execute_trade(signal, current_price, current_date)
+            self.execute_trade(signal, trade_subtype, current_price, current_date)
             
             # 记录组合价值
             portfolio_value = self.capital + self.positions * current_price
@@ -71,7 +74,7 @@ class StockBacktest:
             
         return self.calculate_metrics()
     
-    def execute_trade(self, signal, price, date):
+    def execute_trade(self, signal, trade_subtype, price, date):
         """执行交易，考虑交易成本"""
         if signal == 1 and self.positions == 0:  # 买入信号，空仓
             # 考虑滑点和佣金
@@ -102,6 +105,7 @@ class StockBacktest:
             
             self.trades.append({
                 'type': 'SELL', 
+                'sub_type': trade_subtype,
                 'date': date, 
                 'price': execution_price, 
                 'shares': self.positions,
