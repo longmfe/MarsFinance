@@ -227,3 +227,14 @@ class PortfolioBacktest:
         plt.tight_layout()
         plt.show()
 
+    def print_detailed_trade(self):
+        """打印详细的交易报告"""
+        print("=" * 70)
+        print("PORTFOLIO BACKTEST REPORT - 交易详情")
+        print("=" * 70)
+
+        df = pd.DataFrame(self.all_trades)
+        trades_df = df.reindex(columns=['date', 'stock', 'type', 'sub_type', 'shares', 'price', 'cost', 'revenue', 'profit'])
+        
+        print(trades_df.sort_values(['date']))
+
