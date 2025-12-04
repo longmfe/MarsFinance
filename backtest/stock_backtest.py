@@ -12,6 +12,8 @@ import os
 import requests
 from datetime import datetime, timedelta
 import time
+from dateutil import parser
+import re
 
 class StockBacktest:
     def __init__(self, initial_capital=100000, commission=0.001, slippage=0.001):
@@ -25,6 +27,22 @@ class StockBacktest:
         self.slippage = slippage
         self.position_price = 0
         self.current_stock = None
+
+    def is_date_string_advanced(date_str):
+        """
+        使用dateutil库判断（更智能，能解析更多格式）
+        """
+        try:
+            # 先做一些基本检查，避免解析像"12345"这样的纯数字字符串
+            if re.match(r'^\d+$', date_str):
+                # 纯数字字符串，只接受特定长度的
+                if len(date_str) not in (4, 6, 8):
+                    return False
+            
+            parser.parse(date_str, fuzzy=False)
+            return True
+        except (ValueError, TypeError, OverflowError):
+            return False
         
     def run_backtest(self, data, strategy_function, stock_code=None, enable_stop=True):
         """
@@ -48,7 +66,7 @@ class StockBacktest:
             # 获取日期
             if 'date' in data.columns:
                 current_date = data.iloc[i]['date']
-            elif hasattr(data.index[i], 'strftime'):
+            elif self.is_date_string_advanced(data.index[i]):
                 current_date = data.index[i]
             else:
                 current_date = i
