@@ -20,12 +20,15 @@ class StockBacktest:
         self.initial_capital = initial_capital
         self.capital = initial_capital
         self.positions = 0
+        self.positions_records = []
         self.trades = []
         self.portfolio_values = []
         self.dates = []
         self.commission = commission
         self.slippage = slippage
         self.position_price = 0
+        self.avg_position_price = 0
+        self.avg_cost = 0
         self.current_stock = None
 
     def is_date_string_advanced(date_str):
@@ -82,6 +85,20 @@ class StockBacktest:
                 signal = -1
                 trade_subtype = 'STOP_LOSS'
             
+            # TODO: update position values by day, find current stock and update
+            position_value = self.positions * current_price
+            profit_loss = position_value - self.positions * self.position_price
+
+            self.positions_records.append({
+                'date': date, 
+                'stock': self.current_stock,
+                'shares': self.positions,
+                'close': current_price,
+                'position_value': position_value, 
+                'profit_loss': profit_loss,
+                'avg_cost': self.position_price
+            })
+
             # 执行交易逻辑
             self.execute_trade(signal, trade_subtype, current_price, current_date)
             
@@ -94,7 +111,7 @@ class StockBacktest:
     
     def execute_trade(self, signal, trade_subtype, price, date):
         """执行交易，考虑交易成本"""
-        if signal == 1 and self.positions == 0:  # 买入信号，空仓
+        if signal == 1 and self.positions == 0:  # 买入信号，空仓 TODO: 不能持续买入
             # 考虑滑点和佣金
             execution_price = price * (1 + self.slippage)
             max_shares = self.capital // (execution_price * (1 + self.commission))
@@ -113,12 +130,25 @@ class StockBacktest:
                     'stock': self.current_stock
                 })
             
+                # TODO: update position values when BUY 
+                position_value = self.positions * price
+                self.positions_records.append({
+                    'date': date, 
+                    'stock': self.current_stock,
+                    'shares': self.positions,
+                    'close': price,
+                    'position_value': position_value, 
+                    'profit_loss': 0,
+                    'avg_cost': self.position_price 
+                })
+
         elif signal == -1 and self.positions > 0:  # 卖出信号，持仓
             execution_price = price * (1 - self.slippage)
             revenue = self.positions * execution_price * (1 - self.commission)
             self.capital += revenue
             
             # 计算这次交易的盈亏
+            # TODO: 是否包含滑点和佣金
             profit = revenue - (self.positions * self.position_price)
             
             self.trades.append({
@@ -131,6 +161,18 @@ class StockBacktest:
                 'profit': profit,
                 'stock': self.current_stock
             })
+
+            # TODO: update position values when SELL, remove the stock and update
+            self.positions_records.update({
+                'date': date, 
+                'stock': self.current_stock,
+                'shares': self.positions,
+                'close':,
+                'position_value': , 
+                'profit_loss': profit,
+                'avg_cost': cost
+            })
+
             self.positions = 0
             self.position_price = 0
     
