@@ -86,18 +86,35 @@ class StockBacktest:
                 trade_subtype = 'STOP_LOSS'
             
             # TODO: update position values by day, find current stock and update
-            position_value = self.positions * current_price
-            profit_loss = position_value - self.positions * self.position_price
+            if len(self.positions_records) == 0:
+                self.positions_records.append({
+                    'date': current_date,
+                    'positions': {'cash':, self.initial_capital}
+                    })
+            else:
+                #TODO: update last record
+                last_record = self.positions_record[-1]
 
-            self.positions_records.append({
-                'date': date, 
-                'stock': self.current_stock,
-                'shares': self.positions,
-                'close': current_price,
-                'position_value': position_value, 
-                'profit_loss': profit_loss,
-                'avg_cost': self.position_price
-            })
+                position_value = self.positions * price
+
+                last_record_positions = last_record['posistions']
+                last_record_positions['cash'] = self.capital
+
+                if self.positions > 0:
+                    last_position_value = last_record_positions[self.current_stock]['position_value']
+                    profit_loss = position_value - last_position_value
+                    last_record_positions[self.current_stock] = {
+                        'shares': self.positions,
+                        'close': price,
+                        'position_value': position_value, 
+                        'profit_loss': profit_loss,
+                        'avg_cost': self.position_price 
+                    }
+
+                self.positions_records.append({
+                    'date': current_date,
+                    'positions': last_record_positions
+                    })
 
             # 执行交易逻辑
             self.execute_trade(signal, trade_subtype, current_price, current_date)
@@ -131,16 +148,22 @@ class StockBacktest:
                 })
             
                 # TODO: update position values when BUY 
+                last_record = self.positions_records[-1]
                 position_value = self.positions * price
-                self.positions_records.append({
-                    'date': date, 
-                    'stock': self.current_stock,
+                last_record_positions = last_record['posistions']
+                last_record_positions['cash'] = self.capital
+                last_record_positions[self.current_stock] = {
                     'shares': self.positions,
                     'close': price,
                     'position_value': position_value, 
                     'profit_loss': 0,
                     'avg_cost': self.position_price 
-                })
+                    }
+                
+                self.positions_records.append({
+                    'date': current_date,
+                    'positions': last_record_positions
+                    })
 
         elif signal == -1 and self.positions > 0:  # 卖出信号，持仓
             execution_price = price * (1 - self.slippage)
@@ -163,15 +186,16 @@ class StockBacktest:
             })
 
             # TODO: update position values when SELL, remove the stock and update
-            self.positions_records.update({
-                'date': date, 
-                'stock': self.current_stock,
-                'shares': self.positions,
-                'close':,
-                'position_value': , 
-                'profit_loss': profit,
-                'avg_cost': cost
-            })
+            last_record = self.positions_records[-1]
+            position_value = self.positions * price
+            last_record_positions = last_record['posistions']
+            last_record_positions['cash'] = self.capital
+            del last_record_positions[self.current_stock]
+            
+            self.positions_records.append({
+                'date': current_date,
+                'positions': last_record_positions
+                })
 
             self.positions = 0
             self.position_price = 0
