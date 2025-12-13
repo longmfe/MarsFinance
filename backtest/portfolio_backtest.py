@@ -238,3 +238,10 @@ class PortfolioBacktest:
         
         print(trades_df.sort_values(['date']))
 
+    def print_detailed_position(self):
+        """打印详细的每日持仓"""
+        print("=" * 70)
+        print("PORTFOLIO BACKTEST REPORT - 每日持仓")
+        print("=" * 70)
+
+        print(self.portfolio_values)
