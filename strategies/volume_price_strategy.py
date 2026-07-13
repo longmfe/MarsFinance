@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-
+"""量价策略族：基础量价信号 + 波动率自适应阈值 + 成交量质量过滤 + 动量确认。
+
+信号约定：1 = 买入，-1 = 卖出，0 = 不操作。
+``optimized_volume_price_strategy`` 为集成版：先过滤异常成交量（|z|>3），
+再按波动率动态调整阈值，最后要求多时间框架动量与量价信号方向一致才出手。
+"""
+
 import pandas as pd
-from typing import Union
 
 def enhanced_volume_price_strategy(data: pd.DataFrame, volume_period: int = 20) -> int:
     """
@@ -39,7 +46,7 @@ def enhanced_volume_price_strategy(data: pd.DataFrame, volume_period: int = 20) 
         return 0
 
 def dynamic_threshold_adjustment(data, base_buy_threshold=1.2, base_sell_threshold=0.8):
-    """基于波动率的动态阈值调整 - 立即实现"""
+    """基于波动率的动态阈值调整"""
     if len(data) < 20:
         return base_buy_threshold, base_sell_threshold
 
@@ -55,7 +62,7 @@ def dynamic_threshold_adjustment(data, base_buy_threshold=1.2, base_sell_thresho
         return base_buy_threshold, base_sell_threshold
 
 def volume_quality_filter(data, volume_period=20):
-    """成交量质量过滤 - 立即实现"""
+    """成交量质量过滤"""
     df = data.copy()
     df['volume_ma'] = df['volume'].rolling(window=volume_period).mean()
     df['volume_std'] = df['volume'].rolling(window=volume_period).std()
@@ -67,7 +74,7 @@ def volume_quality_filter(data, volume_period=20):
     return abs(current_volume_z) <= 3  # 3倍标准差内的正常成交量
 
 def price_momentum_confirmation(data, short_period=3, long_period=10):
-    """价格动量确认 - 立即实现"""
+    """价格动量确认"""
     df = data.copy()
     df['momentum_short'] = df['close'] / df['close'].shift(short_period) - 1
     df['momentum_long'] = df['close'] / df['close'].shift(long_period) - 1
@@ -84,7 +91,7 @@ def price_momentum_confirmation(data, short_period=3, long_period=10):
         return 0  # 中性
 
 def optimized_volume_price_strategy(data, volume_period=20):
-    """集成所有优化的最终版本 - 立即实现"""
+    """集成所有优化的最终版本"""
     # 1. 成交量质量检查
     if not volume_quality_filter(data, volume_period):
         return 0

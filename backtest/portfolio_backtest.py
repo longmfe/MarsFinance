@@ -1,22 +1,20 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+# -*- coding: utf-8 -*-
+"""组合回测引擎：在股票池上批量运行单票回测并聚合组合级指标。
 
-# 设置中文字体
+每只股票分配等额资金（capital_per_stock），逐票调用 StockBacktest，
+汇总组合收益、平均夏普/回撤/胜率、正收益比例，并支持归一化净值对比绘图。
+"""
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from .stock_backtest import StockBacktest
+
+# 中文图表字体
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']
 plt.rcParams['axes.unicode_minus'] = False
 
-from xtquant import xtdata
-import datetime
-import dateutil
-
-import pandas as pd
-import numpy as np
-import os
-import requests
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
-import time
 
 class PortfolioBacktest:
     def __init__(self, initial_capital=1000000):
