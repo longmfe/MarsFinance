@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+# third-party SDK shipped with the QMT terminal; install locally, do not commit
+xtquant/
+app/xtquant/
+.vscode/
+.idea/
+*.log
+.DS_Store
+data/
+*.pkl
+.env

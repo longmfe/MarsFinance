@@ -1,0 +1,11 @@
+pandas>=1.5
+numpy>=1.21
+scikit-learn>=1.2
+xgboost>=1.7
+matplotlib>=3.5
+seaborn>=0.12
+ta>=0.10
+yfinance>=0.2
+python-dateutil>=2.8
+# xtquant is NOT on PyPI: it ships with the QMT/MiniQMT trading terminal.
+# Copy it from your QMT installation or add its path to PYTHONPATH.
