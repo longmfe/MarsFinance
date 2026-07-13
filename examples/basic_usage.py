@@ -11,7 +11,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from backtest.portfolio_backtest import PortfolioBacktest  # noqa: E402
 from data_loader.data_loader import DataLoader  # noqa: E402
-from strategies.volume_price_strategy import enhanced_volume_price_strategy  # noqa: E402
+from strategies.volume_price_strategy import (  # noqa: E402
+    enhanced_volume_price_strategy,
+)
 
 
 def main():

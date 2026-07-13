@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 driver = webdriver.Safari()
 
@@ -12,22 +12,24 @@ driver.maximize_window()
 driver.find_element_by_id("inputCode").clear()
 driver.find_element_by_id("inputCode").send_keys("600000")
 
-js="document.getElementById('start_date').removeAttribute('readonly')"
+js = "document.getElementById('start_date').removeAttribute('readonly')"
 driver.execute_script(js)
 driver.find_element_by_id("start_date").clear()
 driver.find_element_by_id("start_date").send_keys("2020-04-03")
 
-js="document.getElementById('end_date').removeAttribute('readonly')"
+js = "document.getElementById('end_date').removeAttribute('readonly')"
 driver.execute_script(js)
 driver.find_element_by_id("end_date").clear()
 driver.find_element_by_id("end_date").send_keys("2021-04-03")
 
-js='document.getElementById("btnQuery").click()'
+js = 'document.getElementById("btnQuery").click()'
 driver.execute_script(js)
 
 table_search = driver.find_element_by_css_selector("[class='table search_']")
 
-table_header = table_search.find_elements_by_tag_name("tr")[0].find_elements_by_tag_name("th")
+table_header = table_search.find_elements_by_tag_name("tr")[
+    0
+].find_elements_by_tag_name("th")
 columns = []
 for th in table_header:
     columns.append(th.text)
@@ -41,8 +43,7 @@ for tr in table_row:
     ret = []
     for col in td:
         ret.append(col.text)
-    link = td.find_element_by_xpath("//*[@href]").get_attribute('href')
+    link = td.find_element_by_xpath("//*[@href]").get_attribute("href")
     print(link)
     ret.append(link)
     final_ret.append(ret)
-
