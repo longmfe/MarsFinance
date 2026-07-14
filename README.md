@@ -1,109 +1,107 @@
-# 🚀 MarsFinance 量化交易研究平台
+# MarsFinance
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Pandas](https://img.shields.io/badge/Pandas-1.5%2B-orange)](https://pandas.pydata.org/)
-[![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.2%2B-yellow)](https://scikit-learn.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-**开源量化交易研究框架** | 集成数据处理、策略开发、回测验证、参数优化的完整解决方案
+**[中文说明 →](README.zh-CN.md)**
 
-## 📈 项目概述
+An open-source quantitative research framework for the Chinese A-share market:
+data loading via QMT/xtquant, a volume-price strategy family, event-loop
+backtesting with realistic trading frictions, and an XGBoost return-prediction
+pipeline.
 
-MarsFinance 是一个专业的量化交易研究平台，旨在为量化研究员和算法交易员提供从策略构思到回测验证的完整工具链。平台集成了传统量化方法和现代机器学习技术，支持多市场、多策略的量化投资研究。
+Built 2024–2026.03 as the research infrastructure behind my personal systematic
+investing practice, and kept public as a research record. Its successor — a
+fundamentals-driven investment decision system — is developed privately.
 
-### 🎯 核心价值
-- **完整流水线**: 数据获取 → 策略开发 → 回测验证 → 性能分析
-- **生产就绪**: 考虑交易成本、滑点、仓位限制等现实因素
-- **技术驱动**: 结合传统量化方法和现代机器学习技术
-- **开源透明**: 代码可复现，算法可验证，结果可追溯
+## Highlights
 
-## 🛠 技术架构
+- **Structural look-ahead protection.** On day *i* the strategy function
+  receives only `data.iloc[:i]` (data through day *i−1*), while execution uses
+  day-*i* prices. Signals are separated from execution by construction, not by
+  after-the-fact checks. (`backtest/stock_backtest.py`)
+- **Realistic frictions.** Commission and slippage are modeled on both sides:
+  buys fill above market at `price × (1 + slippage)` plus commission, sells fill
+  below market at `price × (1 − slippage)` minus commission.
+- **Volume-price strategy family.** A base volume/price signal hardened by three
+  filters: volatility-adaptive thresholds, a 3σ abnormal-volume filter, and
+  multi-timeframe momentum confirmation — conflicting signals mean no trade.
+  (`strategies/volume_price_strategy.py`)
+- **XGBoost return prediction.** 30-day forward-return regression over four
+  feature families (momentum, volume/money-flow, technical, volatility &
+  sentiment); time-ordered train/test split, scaler fit on the training set
+  only, TimeSeriesSplit cross-validation; direction accuracy reported alongside
+  MSE/MAE/R². (`machine_learning/xgboost_prediction_framework.py`)
+- **Portfolio layer.** Equal-capital allocation across the CSI 300 universe,
+  aggregated portfolio metrics (return, Sharpe, drawdown, win rate, share of
+  profitable names), normalized equity-curve comparison against a benchmark.
+- **Research reproductions** (notebooks under `app/`): Piotroski F-Score
+  applied to A-shares, CSCV probability of backtest overfitting, and
+  risk-budgeting / ML-based asset allocation — see
+  [`src/research_papers/README.md`](src/research_papers/README.md) for the
+  papers.
 
-### 核心技术栈
-```python
-# 核心依赖
-Python >= 3.8
-Pandas >= 1.5.0
-NumPy >= 1.21.0
-Scikit-learn >= 1.2.0
-Matplotlib >= 3.5.0
-Optuna >= 3.0.0
-```
+## Layout
 
-### 系统目录结构
 ```
 MarsFinance/
-├── 📊 app/                      # 策略开发应用目录
-│   ├── __init__.py
-│   ├── config/                  # 策略配置文件
-│   │   ├── __init__.py
-│   │   ├── strategy_config.yaml
-│   │   └── market_config.py
-│   ├── core/                    # 策略核心组件
-│   │   ├── __init__.py
-│   │   ├── signal_generator.py
-│   │   ├── risk_manager.py
-│   │   └── position_sizer.py
-│   ├── utils/                   # 策略开发工具
-│   │   ├── __init__.py
-│   │   ├── data_processor.py
-│   │   ├── performance_analyzer.py
-│   │   └── report_generator.py
-│   └── pipelines/               # 策略流水线
-│       ├── __init__.py
-│       ├── strategy_pipeline.py
-│       └── backtest_pipeline.py
-├── 📚 src/                      # 自研算法 & 量化研报参考
-│   ├── __init__.py
-│   ├── research_papers/         # 量化研报参考实现
-│   │   ├── __init__.py
-│   │   └── README.md           # 研报目录说明
-│   └── original_research/      # 自研算法和创新研究
-│       ├── __init__.py
-│       └── README.md           # 自研研究说明
-├── 📊 data_loader/          # 数据获取与处理模块
-│   ├── __init__.py
-│   └── data_loader.py
-├── 🤖 strategies/           # 策略库
-│   ├── __init__.py
-│   └── volume_price_strategy.py
-├── 🔄 backtest/             # 回测引擎
-│   ├── __init__.py
-│   ├── stock_backtest.py
-│   └── portfolio_backtest.py
-├── ⚙️ optimization/         # 参数优化
-│   ├── __init__.py
-│   └── parameter_optimizer.py
-├── 📈 visualization/        # 可视化分析
-│   ├── __init__.py
-│   └── performance_plotter.py
-└── 📚 examples/            # 使用示例
-    └── basic_usage.py
+├── backtest/             # single-stock & portfolio engines, multi-strategy comparison
+├── strategies/           # volume-price family + classic baselines (MA cross, RSI, Bollinger)
+├── machine_learning/     # XGBoost return-prediction pipeline
+├── data_loader/          # QMT/xtdata market-data loaders
+├── app/                  # research notebooks + evolved engine (daily position snapshots)
+├── examples/             # runnable usage example
+└── src/research_papers/  # reproduced papers (citations; PDFs not redistributed)
 ```
 
-## 🚀 快速开始
-### 安装依赖
+## Quick start
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 基本使用
 ```python
-from marsfinance import DataLoader, PortfolioBacktest
-from marsfinance.strategies import EnhancedVolumePriceStrategy
+from data_loader.data_loader import DataLoader
+from backtest.portfolio_backtest import PortfolioBacktest
+from strategies.volume_price_strategy import enhanced_volume_price_strategy
 
-# 加载数据
 loader = DataLoader()
-stock_data = loader.load_hs300_data('20230101', '20231231')
+stock_data = loader.load_hs300_data("20230101", "20231231")
 
-# 运行回测
-backtest = PortfolioBacktest(initial_capital=1000000)
+backtest = PortfolioBacktest(initial_capital=1_000_000)
 backtest.run_stock_universe_backtest(
     stock_data_dict=stock_data,
-    strategy_function=EnhancedVolumePriceStrategy,
-    capital_per_stock=20000
+    strategy_function=enhanced_volume_price_strategy,
+    capital_per_stock=20_000,
 )
-
-# 查看结果
 backtest.print_detailed_report()
 ```
+
+See [`examples/basic_usage.py`](examples/basic_usage.py) for the runnable
+version.
+
+## Data sources
+
+- **A-shares:** `xtquant`/`xtdata`, which ships with the QMT / MiniQMT trading
+  terminal (not on PyPI — copy it from your QMT installation or add it to
+  `PYTHONPATH`). Imports are lazy, so the rest of the package works without it.
+- **US-market experiments:** `yfinance`.
+
+## Project status, honestly
+
+- **Archived** (developed 2024.01–2026.03). Maintained as a research record,
+  not as a production system.
+- Notebooks under `app/` are research artifacts in varying stages of maturity;
+  all outputs are stripped.
+- Strategy parameters are hand-tuned defaults, not systematically calibrated.
+  That lesson is carried into the successor system as a hard constraint: no
+  parameter enters production without out-of-sample validation.
+
+## Disclaimer
+
+For research and education only. Nothing in this repository is investment
+advice.
+
+## License
+
+[MIT](LICENSE) — © Long Huang (黄隆)
