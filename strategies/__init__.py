@@ -5,3 +5,4 @@ from .volume_price_strategy import (
     price_momentum_confirmation,
     volume_quality_filter,
 )
+from .yjyg_event_strategy import yjyg_event_strategy

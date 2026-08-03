@@ -29,13 +29,17 @@ class DataLoader:
         self.data_sources = {}
 
     def load_hs300_data(
-        self, start_date: str, end_date: str
+        self, start_date: str, end_date: str, dividend_type: str = "none"
     ) -> Dict[str, pd.DataFrame]:
         """下载沪深300全成分股的日线数据。
 
         Args:
             start_date: 开始日期 (YYYYMMDD)
             end_date: 结束日期 (YYYYMMDD)
+            dividend_type: 复权方式，'none' 不复权（默认，保持原有行为）/
+                'front' 前复权 / 'back' 后复权。事件研究建议用 'back'：
+                后复权不会改写历史价格，是时点安全的；前复权用未来分红重写
+                历史，本身带有轻微未来函数。
 
         Returns:
             dict: {股票代码: 行情 DataFrame}
@@ -44,14 +48,22 @@ class DataLoader:
         print(f"获取到 {len(stock_codes)} 只股票")
 
         stock_data_dict = self.download_hs300_data(
-            stock_codes, start_date=start_date, end_date=end_date
+            stock_codes,
+            start_date=start_date,
+            end_date=end_date,
+            dividend_type=dividend_type,
         )
 
         print(f"加载沪深300数据: {start_date} 到 {end_date}")
         return stock_data_dict
 
     @staticmethod
-    def download_hs300_data(stock_codes, start_date="20200101", end_date="20231231"):
+    def download_hs300_data(
+        stock_codes,
+        start_date="20200101",
+        end_date="20231231",
+        dividend_type="none",
+    ):
         """经 xtdata 下载各股票的日线 OHLCV 数据并整理为字典。"""
         xtdata = _xtdata()
         fields = ["open", "close", "high", "low", "volume", "amount", "preClose"]
@@ -60,13 +72,15 @@ class DataLoader:
         stock_data_dict = {}
         for i, code in enumerate(stock_codes):
             print(f"\n正在下载第 {i + 1} 只股票: {code}")
+            # 不传 count：传 count 会退化为“取最后 N 根”，
+            # 使 start_time/end_time 区间被静默截断。
             data = xtdata.get_market_data_ex(
                 field_list=fields,
                 stock_list=[code],
                 start_time=start_date,
                 end_time=end_date,
                 period="1d",
-                count=1000,
+                dividend_type=dividend_type,
             )
 
             if data and code in data:

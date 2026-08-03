@@ -30,6 +30,7 @@ class PortfolioBacktest:
         start_date=None,
         end_date=None,
         capital_per_stock=100000,
+        enable_stop=True,
     ):
         """
         遍历股票池进行回测
@@ -40,6 +41,8 @@ class PortfolioBacktest:
         start_date: 开始日期
         end_date: 结束日期
         capital_per_stock: 每只股票分配的资金
+        enable_stop: 是否启用 5% 固定止损（事件策略建议关闭：固定持有期内
+            5% 止损会被日常波动触发，恰好截断策略要捕捉的赢家）
         """
         print(f"开始回测，股票数量: {len(stock_data_dict)}")
         print(f"时间范围: {start_date} 到 {end_date}")
@@ -67,7 +70,7 @@ class PortfolioBacktest:
             # 运行单只股票回测
             backtest = StockBacktest(initial_capital=capital_per_stock)
             metrics = backtest.run_backtest(
-                filtered_data, strategy_function, stock_code
+                filtered_data, strategy_function, stock_code, enable_stop=enable_stop
             )
 
             # 保存结果
