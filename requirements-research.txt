@@ -1,0 +1,15 @@
+# research/ 子包的依赖，与仓库根 requirements.txt（已归档的 QMT/量价研究栈）相互独立。
+# 安装：pip install -r requirements-research.txt
+
+pandas>=1.5
+numpy>=1.21
+scipy>=1.10
+akshare>=1.15
+pyarrow>=12.0
+scikit-learn>=1.2
+lightgbm>=4.0
+cvxpy>=1.3
+matplotlib>=3.5
+seaborn>=0.12
+tqdm>=4.60
+pytest>=7.0
