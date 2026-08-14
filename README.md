@@ -75,6 +75,9 @@ MarsFinance/
 └── src/research_papers/  # reproduced papers (citations; PDFs not redistributed)
 ```
 
+For the full module map, data-flow layering and project boundaries, see
+[`ARCHITECTURE.md`](ARCHITECTURE.md).
+
 ## Quick start
 
 ```bash

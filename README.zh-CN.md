@@ -60,6 +60,8 @@ MarsFinance/
 └── src/research_papers/  # 复现论文（引用清单；不再分发 PDF）
 ```
 
+完整的模块地图、分层数据流与项目边界见 [`ARCHITECTURE.md`](ARCHITECTURE.md)。
+
 ## 快速开始
 
 ```bash
