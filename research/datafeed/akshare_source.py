@@ -12,6 +12,8 @@
 stock_zcfz_em / stock_lrb_em / stock_xjll_em  datacenter-web.em   可用
 stock_balance_sheet_by_report_em              datacenter-web.em   可用
 stock_zh_a_daily                              新浪                可用
+fund_etf_hist_sina                            新浪                可用
+futures_main_sina                             新浪                可用
 index_stock_cons                              新浪                可用
 stock_zh_index_daily                          腾讯                可用
 stock_zh_a_hist / stock_zh_a_spot_em          push2.eastmoney     **不可用**
@@ -20,8 +22,12 @@ index_stock_cons_csindex                      中证指数            **不可�
 
 失效的两组端点不要再用：``stock_zh_a_hist`` 走 ``80.push2.eastmoney.com``，
 本机连接被拒；中证指数的接口返回的不是 Excel 而是错误页。
+``fund_etf_hist_sina`` 与 ``stock_zh_a_daily`` 同属新浪 realstock 主机，
+同样可用；若某天失效，备选是东方财富的 ``fund_etf_hist_em``（push2 系，
+本机未验证）。
 """
 
+import re
 from typing import Optional
 
 import pandas as pd
@@ -181,3 +187,124 @@ def fetch_index_daily(symbol: str = "sh000300", force: bool = False) -> pd.DataF
         lambda: _ak().stock_zh_index_daily(symbol=symbol),
         force=force,
     )
+
+
+def _to_sina_etf_symbol(code: str) -> str:
+    """ETF 代码 → 新浪接口格式：``"510310"`` → ``"sh510310"``。
+
+    ETF 的代码约定与股票不同：沪市 ETF 以 5 开头（51/56/58/588），
+    深市 ETF 以 1 开头（15/16）。``panel.normalize_code`` 只认股票前缀，
+    故这里单独处理，不改动共享的股票代码约定。
+
+    Args:
+        code: ETF 代码，如 ``"510310"`` / ``"159915"``
+
+    Returns:
+        str: 带市场前缀的新浪格式代码
+
+    Raises:
+        ValueError: 不是 6 位数字，或前缀不属于已知 ETF 市场
+    """
+    text = str(code).strip().lower()
+    if text.startswith("sh") or text.startswith("sz"):
+        text = text[2:]
+    if not text.isdigit() or len(text) != 6:
+        raise ValueError(f"无法解析 ETF 代码: {code!r}")
+
+    if text.startswith("5"):
+        return f"sh{text}"
+    if text.startswith("1"):
+        return f"sz{text}"
+    raise ValueError(f"未知 ETF 交易所前缀: {code!r} (沪市 5 开头，深市 1 开头)")
+
+
+def fetch_etf_daily(code: str = "510310", force: bool = False) -> pd.DataFrame:
+    """单只 ETF 的日线（新浪源，全历史，约 1~3s）。
+
+    与 ``fetch_daily_bars`` 的区别：ETF 走 ``fund_etf_hist_sina`` 端点
+    （``stock_zh_a_daily`` 只覆盖股票）。首次调用联网取数并落盘缓存，
+    之后离线且秒级。
+
+    Args:
+        code: ETF 代码，如 ``"510310"``（沪深300ETF）、``"159915"``
+        force: 忽略缓存重新取数
+
+    Returns:
+        pd.DataFrame: 含 date/open/high/low/close/volume，按日期升序；
+        date 已归一为 ``datetime64``（新浪原始返回 ``datetime.date``，
+        直接落盘会被 ``normalize_for_parquet`` 误判为 object 列而破坏）
+    """
+    symbol = _to_sina_etf_symbol(code)
+
+    raw = cached(
+        "fund_etf_hist_sina",
+        {"symbol": symbol},
+        lambda: _ak().fund_etf_hist_sina(symbol=symbol),
+        force=force,
+    )
+
+    if raw.empty:
+        return raw
+
+    out = raw.copy()
+    out["date"] = pd.to_datetime(out["date"])
+    return out.sort_values("date").reset_index(drop=True)
+
+
+# 新浪期货日线端点返回的中文列名 → 仓库统一英文列名
+_FUTURES_COLUMN_MAP = {
+    "日期": "date",
+    "开盘价": "open",
+    "最高价": "high",
+    "最低价": "low",
+    "收盘价": "close",
+    "成交量": "volume",
+    "持仓量": "hold",
+    "动态结算价": "settle",
+}
+
+
+def _validate_futures_symbol(symbol: str) -> str:
+    """期货代码校验并归一为大写：``"if0"`` → ``"IF0"``。
+
+    新浪格式：品种字母（1~3 位）+ 数字。``IF0`` 是主力连续（已复权拼接，
+    换月无跳空，适合直接回测），``IF2508`` 是具体合约。
+
+    Raises:
+        ValueError: 不是合法的新浪期货代码格式
+    """
+    text = str(symbol).strip().upper()
+    if not re.fullmatch(r"[A-Z]{1,3}\d{1,4}", text):
+        raise ValueError(f"无法解析期货代码: {symbol!r} (新浪格式如 'IF0' / 'IF2508')")
+    return text
+
+
+def fetch_futures_daily(symbol: str = "IF0", force: bool = False) -> pd.DataFrame:
+    """单品种期货日线（新浪源，主力连续为已复权拼接）。
+
+    首次调用联网取数并落盘缓存，之后离线且秒级。``IF0`` 的可用历史
+    约从 2017 年起（新浪只保留这么多）。
+
+    Args:
+        symbol: 期货代码，``"IF0"`` 主力连续 / ``"IF2508"`` 具体合约
+        force: 忽略缓存重新取数
+
+    Returns:
+        pd.DataFrame: 含 date/open/high/low/close/volume/hold/settle，
+        按日期升序；date 已归一为 ``datetime64``
+    """
+    symbol = _validate_futures_symbol(symbol)
+
+    raw = cached(
+        "futures_main_sina",
+        {"symbol": symbol},
+        lambda: _ak().futures_main_sina(symbol=symbol),
+        force=force,
+    )
+
+    if raw.empty:
+        return raw
+
+    out = raw.rename(columns=_FUTURES_COLUMN_MAP).copy()
+    out["date"] = pd.to_datetime(out["date"])
+    return out.sort_values("date").reset_index(drop=True)
