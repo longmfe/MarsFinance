@@ -4,7 +4,18 @@ import dateutil
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from xtquant import xtdata
+
+
+def _xtdata():
+    """延迟导入 xtdata，未安装时给出可操作的报错信息。"""
+    try:
+        from xtquant import xtdata
+    except ImportError as exc:
+        raise ImportError(
+            "缺少 xtquant：它随 QMT/MiniQMT 终端分发（不在 PyPI），"
+            "请从 QMT 安装目录复制到项目或加入 PYTHONPATH。"
+        ) from exc
+    return xtdata
 
 
 class Context:
@@ -15,7 +26,7 @@ class Context:
         self.bkt_end_date = bkt_end_date
         self.positions = {}
         self.benchmark = None
-        self.date_range = xtdata.get_trading_calendar(
+        self.date_range = _xtdata().get_trading_calendar(
             market, bkt_start_date, bkt_end_date
         )
         self.bkt_dt = None
@@ -36,6 +47,7 @@ def get_hist_data_by_count(
     dividend_type="none",
     fields=["open", "close", "high", "low", "volume", "preClose"],
 ):
+    xtdata = _xtdata()
     hist_end_date = (
         dateutil.parser.parse(context.bkt_dt) - datetime.timedelta(days=1)
     ).strftime("%Y%m%d")
@@ -66,6 +78,7 @@ def get_hist_data_by_daterange(
     hist_end_date,
     fields=["open", "close", "high", "low", "volume", "preClose"],
 ):
+    xtdata = _xtdata()
     _period = "1d"
     code = code + "." + context.market
     xtdata.download_history_data(code, _period, hist_start_date, hist_end_date)
@@ -83,6 +96,7 @@ def get_hist_data_by_daterange(
 
 
 def get_today_data(code, fields=["open", "close", "high", "low", "volume", "preClose"]):
+    xtdata = _xtdata()
     _period = "1d"
     _count = 1
     code = code + "." + context.market

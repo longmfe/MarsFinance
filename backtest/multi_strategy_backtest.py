@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""多策略对比回测：同一股票池上跑多个策略并出对比报告。"""
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# 设置中文字体
+plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei"]
+plt.rcParams["axes.unicode_minus"] = False
+
+
 class MultiStrategyBacktest:
     """多策略回测框架"""
 

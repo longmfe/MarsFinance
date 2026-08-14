@@ -6,11 +6,7 @@ import pandas as pd
 plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei"]
 plt.rcParams["axes.unicode_minus"] = False
 
-import datetime
 import warnings
-
-from scipy import stats
-from xtquant import xtdata
 
 warnings.filterwarnings("ignore")
 

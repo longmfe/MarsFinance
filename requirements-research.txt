@@ -1,4 +1,6 @@
-# research/ 子包的依赖，与仓库根 requirements.txt（已归档的 QMT/量价研究栈）相互独立。
+# research/ 子包的额外依赖：研报复现（FFScore、CSCV、风险预算）所需的重依赖。
+# 核心栈（回测引擎、策略族、akshare 数据层、ETF/期货示例）只需
+# 仓库根 requirements.txt；只有跑 research/ 下的研报复现才需要本文件。
 # 安装：pip install -r requirements-research.txt
 
 pandas>=1.5

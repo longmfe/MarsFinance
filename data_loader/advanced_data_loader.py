@@ -2,7 +2,18 @@ import time
 from typing import Dict, List, Tuple
 
 import pandas as pd
-from xtquant import xtdata
+
+
+def _xtdata():
+    """延迟导入 xtdata，未安装时给出可操作的报错信息。"""
+    try:
+        from xtquant import xtdata
+    except ImportError as exc:
+        raise ImportError(
+            "缺少 xtquant：它随 QMT/MiniQMT 终端分发（不在 PyPI），"
+            "请从 QMT 安装目录复制到项目或加入 PYTHONPATH。"
+        ) from exc
+    return xtdata
 
 
 class AdvancedDataLoader:
@@ -32,6 +43,7 @@ class AdvancedDataLoader:
             }
 
         # 启动下载
+        xtdata = _xtdata()
         requested_stocks = []
         for stock_code in stock_codes:
             try:
@@ -113,6 +125,7 @@ class AdvancedDataLoader:
         self, stock_code: str, start_date: str, end_date: str, period: str
     ) -> bool:
         """检查数据是否可用"""
+        xtdata = _xtdata()
         try:
             data = xtdata.get_market_data(
                 stock_list=[stock_code],
@@ -160,6 +173,7 @@ class AdvancedDataLoader:
 
         for stock_code in load_codes:
             try:
+                xtdata = _xtdata()
                 data = xtdata.get_market_data(
                     stock_list=[stock_code],
                     period=period,

@@ -1,11 +1,3 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
-# 设置中文字体
-plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei"]
-plt.rcParams["axes.unicode_minus"] = False
-
 import datetime
 import os
 import time
@@ -16,7 +8,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
-from xtquant import xtdata
+
+# 设置中文字体
+plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei"]
+plt.rcParams["axes.unicode_minus"] = False
+
+
+def _xtdata():
+    """延迟导入 xtdata，未安装时给出可操作的报错信息。"""
+    try:
+        from xtquant import xtdata
+    except ImportError as exc:
+        raise ImportError(
+            "缺少 xtquant：它随 QMT/MiniQMT 终端分发（不在 PyPI），"
+            "请从 QMT 安装目录复制到项目或加入 PYTHONPATH。"
+        ) from exc
+    return xtdata
 
 
 class StockBacktest:
@@ -469,6 +476,7 @@ def enhanced_ma_strategy(data, short_window=10, long_window=30):
 # 数据生成函数（模拟沪深300股票数据）
 def generate_hs300_sample_data(stock_codes, start_date="20200101", end_date="20231231"):
     """生成沪深300股票的模拟数据"""
+    xtdata = _xtdata()
     date_range = pd.date_range(start=start_date, end=end_date, freq="D")
     stock_data_dict = {}
     fields = ["open", "close", "high", "low", "volume", "amount", "preClose"]
@@ -501,6 +509,7 @@ def get_hs300_stock_list():
     Returns:
         list: 包含沪深300成分股代码的列表，如果获取失败则返回空列表
     """
+    xtdata = _xtdata()
     try:
         # 获取沪深300成分股列表
         hs300_constituents = xtdata.get_stock_list_in_sector("沪深300")
