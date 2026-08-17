@@ -95,6 +95,11 @@ def strategy(data: pd.DataFrame) -> int:
 两条路径的产物都归一为同一约定（`{代码: DataFrame}` 或 MultiIndex 面板），
 上层引擎与策略无感知差异。
 
+要加第三条路径，先过 `research/scripts/verify_vendor_bars.py` 的口径校验：
+它**不比价格比收益率**——两家后复权的基准日不同，价格绝对值本来就差一个常数倍，
+而收益率对复权基准免疫；`本地 close / 对方 close` 的比值跳变处，就是双方对某次
+分红送配处理分歧的确切日期。不联网，本地一侧直读 parquet 缓存。
+
 ## 典型工作流
 
 | 场景 | 入口 | 数据 | 引擎 |
@@ -104,6 +109,7 @@ def strategy(data: pd.DataFrame) -> int:
 | 业绩预告事件 | `examples/yjyg_event_example.py` | QMT + akshare | Portfolio + event_stats |
 | Piotroski F-Score 截面 | `research/scripts/backtest_ffscore_pg.py` 或 ffscore 模块 | akshare / 私有 PG | `research/ffscore/backtest.py` |
 | 美股收益预测 | `machine_learning/xgboost_prediction_framework.py` | yfinance | — |
+| 第三方日线口径校验 | `research/scripts/verify_vendor_bars.py` | 本地缓存 + 对方导出 | — |
 
 ## 边界：刻意不做什么
 
