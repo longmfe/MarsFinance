@@ -11,3 +11,4 @@ app/xtquant/
 data/
 *.pkl
 .env
+research/ffscore_pg_output/
